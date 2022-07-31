@@ -715,9 +715,4 @@ public class Game_Main {
 
     }
 
-    public void pause(){
-        try {
-            System.in.read();
-        } catch (IOException e) { }
-    }
 }
