@@ -47,13 +47,13 @@ public class Game_Main {
             try{
                 int tmp = Integer.parseInt(input);
                 if (tmp == 1 ) {
-                    pokemon = new Charmander(200);
+                    pokemon = new Charmander(100);
                     hasChosen = true;
                 } else if (tmp == 2) {
-                    pokemon = new Squirtle(5);
+                    pokemon = new Squirtle(100);
                     hasChosen = true;
                 } else if (tmp == 3) {
-                    pokemon = new Bulbasaur(5);
+                    pokemon = new Bulbasaur(100);
                     hasChosen = true;
                 } else {
                     System.out.println("1,2,3 중 하나를 고르십시오.");
@@ -274,7 +274,7 @@ public class Game_Main {
                     boolean hasEnded = false;
 
 
-                    System.out.println("\n\n[1]자동전투     [2]수동전투");
+                    System.out.println("\n\n[1] 자동전투     [2] 수동전투");
 
                     String fighttype = sc.next();
 
@@ -282,7 +282,7 @@ public class Game_Main {
                         // 자동 전투
                         int skillRandomIndex = (int)(Math.random()*2);
                         Skill wildSkill = wildSkills.get(skillRandomIndex);
-                        int wildDamage = wildSkill.skilldamage*wildPokemon.getLevel()/20;
+                        int wildDamage = wildSkill.skilldamage+wildPokemon.getLevel()/20;
 
                         Random random = new Random();
                         int myattackrandomindex = random.nextInt(2)+1;
@@ -318,8 +318,14 @@ public class Game_Main {
                                 System.out.println();
                             }
                             if(place_n==5){
-                                System.out.println("챔피언 단델과 리자몽을 쓰러뜨리고 지우가 챔피언이 되었습니다!!");
-                                System.out.println("게임을 종료합니다.");
+                                EndingThread endingThread = new EndingThread();
+                                Thread ending = new Thread(endingThread);
+                                ending.start();
+                                try{
+                                    ending.join();
+                                }catch (InterruptedException e){
+                                    e.printStackTrace();
+                                }
                                 try {
                                     Thread.sleep(2000);
                                 } catch (Exception e){
@@ -340,11 +346,46 @@ public class Game_Main {
 
                     }
                     else if (fighttype.equals("2")){ // 수동 전투
+
+
                         // 수동 전투
                         while (!hasEnded){
                             for (int i=0;i<60;i++){
                                 System.out.println();
                             }
+                            if (wildPokemon.getName()=="피카츄"){
+                                System.out.println("피카츄의 전기로 감전되어, 피카츄가 먼저 공격을 합니다!");
+
+                                int skillRandomIndex = (int)(Math.random()*2);
+                                Skill wildSkill = wildSkills.get(skillRandomIndex);
+                                int wild_attack_damage=wildPokemon.attack(pokemon);
+                                System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t-----------------------");
+                                System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t"+wildPokemon.getName()+"의 "+wildSkill.skillname + "!");
+                                System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t"+wild_attack_damage + "의 데미지를 입었습니다.");
+                                System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t-----------------------\n");
+
+                                pokemon.setHp(pokemon.getHp()-wild_attack_damage);
+
+                                if (pokemon.getHp()<=0){
+                                    pokemon.setHp(0);
+                                    System.out.println("당신의 포켓몬이 기절했습니다.");
+                                    System.out.println("마을로 이동해 포켓몬을 치료하세요.\n");
+                                    try {
+                                        Thread.sleep(3000);
+                                    } catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                    for (int i=0;i<60;i++){
+                                        System.out.println();
+                                    }
+                                    hasEnded=true;
+                                    continue;
+                                }
+
+
+
+                            }
+
                             wildPokemon.printWildPokemon();
                             System.out.println("======================");
                             System.out.println("당신의 포켓몬: ");
@@ -360,27 +401,31 @@ public class Game_Main {
                             hasChosen=false;
                             while (!hasChosen){
                                 input = sc.next();
-                                int damage=0;
+
                                 if (input.equals("1")||input.equals("2")){ // 내 공격
+
+
+
+                                    int my_attack_damage=pokemon.attack(wildPokemon);
                                     if(input.equals("1")){ // 1번 기술
                                         hasChosen=true;
-                                        damage=pokemon.getSkill1().skilldamage + pokemon.getLevel() / 20;
+//                                        damage=pokemon.getSkill1().skilldamage + pokemon.getLevel() / 20;
                                         System.out.println("-----------------------");
                                         System.out.println(pokemon.getName() + "의 " + pokemon.getSkill1().skillname + "!");
                                     } else {
                                         hasChosen=true;
-                                        damage=pokemon.getSkill2().skilldamage + pokemon.getLevel() / 20;
+//                                        damage=pokemon.getSkill2().skilldamage + pokemon.getLevel() / 20;
                                         System.out.println("-----------------------");
                                         System.out.println(pokemon.getName() + "의 " + pokemon.getSkill2().skillname + "!");
                                     }
-                                    System.out.println(damage + "의 데미지를 입혔습니다.");
+                                    System.out.println(my_attack_damage + "의 데미지를 입혔습니다.");
                                     System.out.println("-----------------------\n");
                                     try {
                                         Thread.sleep(300);
                                     } catch (Exception e){
                                         e.printStackTrace();
                                     }
-                                    wildPokemon.setHp(wildPokemon.getHp()-damage);
+                                    wildPokemon.setHp(wildPokemon.getHp()-my_attack_damage);
 
                                     if (wildPokemon.getHp()<=0) {
                                         hasEnded=true;
@@ -403,30 +448,27 @@ public class Game_Main {
                                             } catch (Exception e){
                                                 e.printStackTrace();
                                             }
-                                            System.exit(0);
+
                                         }
                                     } else { // 적의 공격
-                                        // 만나는야생 포켓몬마다.
-
-
-
-
-
-                                        int skillRandomIndex = (int)(Math.random()*2);
+                                        int skillRandomIndex;
+                                        Random random = new Random();
+                                        if (wildPokemon.getName()=="리자몽"){
+                                            skillRandomIndex=random.nextInt(4)+1;
+                                        } else if (wildPokemon.getName()=="리자드"){
+                                            skillRandomIndex=random.nextInt(3)+1;
+                                        } else {
+                                            skillRandomIndex=random.nextInt(2)+1;
+                                        }
                                         Skill wildSkill = wildSkills.get(skillRandomIndex);
-                                        int wildDamage = wildSkill.skilldamage*wildPokemon.getLevel()/20;
+//                                      int wildDamage = wildSkill.skilldamage*wildPokemon.getLevel()/20;
+
+                                        int wild_attack_damage=wildPokemon.attack(pokemon);
 
                                         System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t-----------------------");
                                         System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t"+wildPokemon.getName()+"의 "+wildSkill.skillname + "!");
-                                        System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t"+wildDamage + "의 데미지를 입었습니다.");
+                                        System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t"+wild_attack_damage + "의 데미지를 입었습니다.");
                                         System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t\t-----------------------\n");
-
-
-                                        // 야생 포켓몬
-                                        if (wildPokemon.getName()=="아보"){
-                                            System.out.println("아보의 지속 독 데미지로 체력이 추가 감소합니다.");
-                                        }
-
 
 
                                         try {
@@ -434,7 +476,7 @@ public class Game_Main {
                                         } catch (Exception e){
                                             e.printStackTrace();
                                         }
-                                        pokemon.setHp(pokemon.getHp()-wildDamage);
+                                        pokemon.setHp(pokemon.getHp()-wild_attack_damage);
                                         if (pokemon.getHp()<=0){
                                             System.out.println("당신의 포켓몬이 기절했습니다.");
                                             System.out.println("마을로 이동해 포켓몬을 치료하세요.\n");
@@ -446,7 +488,7 @@ public class Game_Main {
                                             for (int i=0;i<60;i++){
                                                 System.out.println();
                                             }
-                                            pokemon.setHp(pokemon.getFullHp());
+                                            pokemon.setHp(0);
                                             hasEnded=true;
                                         }
                                     }
@@ -462,6 +504,14 @@ public class Game_Main {
                                         hasEnded=true;
                                     } else {
                                         System.out.println("포켓볼이 없습니다.");
+                                    }
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                    for (int i=0;i<60;i++){
+                                        System.out.println();
                                     }
                                 } else if(input.equals("r")){
                                     hasChosen=true;
@@ -494,6 +544,14 @@ public class Game_Main {
                         pokemon.setFullHp(pokemon.getFullHp()+5);
                         pokemon.setLevel(pokemon.getLevel()+1);
                         System.out.println("레벨업! 축하합니다!\n");
+                        try {
+                            Thread.sleep(1000);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        for (int i=0;i<60;i++){
+                            System.out.println();
+                        }
                     }
 
                     continue;
@@ -587,7 +645,7 @@ public class Game_Main {
                             if (pokemonList.size() > 0) {//컴퓨터에 포켓몬이 있는경우
                                 System.out.println("==포켓몬 목록==");
                                 for (int i = 0; i < pokemonList.size(); i++) {
-                                    System.out.println((i) + "번 : 레벨 " + pokemonList.get(i).getLevel() + "이름" + pokemonList.get(i).getName());
+                                    System.out.println((i) + "번 : 레벨- " + pokemonList.get(i).getLevel() + ", 이름-" + pokemonList.get(i).getName());
                                 }
                                 System.out.println("교체하시겠습니까? (y/n)");
                                 boolean hasChosen2 = false;
@@ -623,6 +681,11 @@ public class Game_Main {
                                 }
                             } else {
                                 System.out.println("포켓몬이 없습니다.\n");
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (Exception e){
+                                    e.printStackTrace();
+                                }
                             }
                         } else if (input.equals("q")) {
                             isDone = true;

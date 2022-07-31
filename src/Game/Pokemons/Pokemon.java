@@ -81,6 +81,12 @@ public class Pokemon{
             }
         }return false;
     }
+
+    public int attack(Pokemon target){//공격하기
+        return getSkill1().skilldamage;
+    }
+
+
 }
 
 

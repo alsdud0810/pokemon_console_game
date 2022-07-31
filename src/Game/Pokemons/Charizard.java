@@ -1,8 +1,10 @@
 package Game.Pokemons;
 
+import java.util.Random;
+
 public class Charizard extends Charmeleon {
 
-    int weight; // 무게, 일정 체력 증가
+    int weight; // 위협, 상대 데미지 감소
 
     public Charizard(int level) {
         super(level);
@@ -15,11 +17,29 @@ public class Charizard extends Charmeleon {
         this.setSkill4(8);;
     }
 
-    public void weighteffect(){
-        weight=50;
-        setHp(getHp()+weight);
-        System.out.println("리자몽의 단단하고 거대한 몸은 체력을 증가시킵니다.");
-        System.out.println("리자몽의 체력이 50 증가했습니다!");
+    @Override
+    public int attack(Pokemon target){//공격하기
+
+        System.out.println("\n"+getName()+"의 단단하고 거대한 몸집은 위협을 줍니다.");
+        System.out.println(target.getName()+"의 공격 데미지를 감소시킵니다.");
+
+        Random random = new Random();
+        weight=random.nextInt(5)+1;
+        target.getSkill1().skilldamage-=weight;
+        target.getSkill2().skilldamage-=weight;
+
+        int damage;
+        int skillRandomIndex = random.nextInt(4)+1;
+        if (skillRandomIndex==1){
+            damage=getSkill1().skilldamage+getLevel()/20;
+        } else if(skillRandomIndex==2){
+            damage=getSkill2().skilldamage+getLevel()/20;
+        } else if(skillRandomIndex==3){
+            damage=getSkill3().skilldamage+getLevel()/20;
+        } else {
+            damage=getSkill4().skilldamage+getLevel()/20;
+        }
+        return damage;
     }
 
 
